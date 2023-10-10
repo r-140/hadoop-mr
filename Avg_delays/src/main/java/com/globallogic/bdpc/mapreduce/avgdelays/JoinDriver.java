@@ -29,6 +29,7 @@ public class JoinDriver {
         job.setOutputValueClass(Text.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
+        System.out.println("args " + args);
 
         MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, JoinMapperAirlineName.class);
 
