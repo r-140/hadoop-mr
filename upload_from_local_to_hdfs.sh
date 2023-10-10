@@ -23,6 +23,7 @@ then
   hdfs dfs -mkdir -p "$HDFS_PATH"
 fi
 
+CLUSTER_URI="hdfs://procamp-cluster-m"
 THIS_FILE=$(readlink -f "$0")
 THIS_PATH=$(dirname "$THIS_FILE")
 BASE_PATH=$(readlink -f "$THIS_PATH/../")
@@ -46,7 +47,7 @@ echo "HDFS_PATH = $HDFS_PATH"
 echo "-------------------------------------"
 
 
-SUBMIT_CMD="hdfs distcp ${STORAGE_PATH} ${HDFS_PATH}"
+SUBMIT_CMD="hadoop distcp ${STORAGE_PATH} ${CLUSTER_URI}${HDFS_PATH}"
 echo "$SUBMIT_CMD"
 ${SUBMIT_CMD}
 

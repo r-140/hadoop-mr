@@ -40,7 +40,7 @@ if [[ -z "$EXECUTOR" ]];
 then
   EXECUTOR="yarn"
 fi
-INPUT_PATH = "/bdpc/Avg_Delays_MR/Avg_delays/input/flights.csv"
+INPUT_PATH = "/bdpc/Avg_Delays_MR/Avg_delays/input"
 hadoop fs -rm -R $OUTPUT_PATH
 hdfs dfs -ls ${INPUT_PATH}
 
@@ -59,11 +59,12 @@ echo "INPUT_PATH1 = $INPUT_PATH1"
 echo "INPUT_PATH2 = $INPUT_PATH2"
 echo "OUTPUT_PUTH = $OUTPUT_PATH"
 echo "-------------------------------------"
-
+:q
 mapReduceArguments=(
   "$APP_PATH"
   "com.globallogic.bdpc.mapreduce.avgdelays.JoinDriver"
-  "$INPUT_PATH"
+  "$INPUT_PATH1"
+  "$INPUT_PATH2"
   "$OUTPUT_PATH"
 )
 
