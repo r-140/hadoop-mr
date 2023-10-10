@@ -129,10 +129,10 @@ public class JoinDriver {
 
             if(headerList.length == values.length && !header.equals(line)) {
                 if(counter < 4) {
-                    logger.info("airline values " + Arrays.toString(values));
+                    logger.info("flight values " + Arrays.toString(values));
                 }
                 for(int i = 0; i < values.length; i++) {
-                    context.write(new Text(values[3]), new Text("name:" + values[11]));
+                    context.write(new Text(values[4]), new Text("name:" + values[11]));
                     counter++;
                 }
             }
@@ -161,6 +161,7 @@ public class JoinDriver {
                     }
                 } catch (java.lang.ArrayIndexOutOfBoundsException e) {
                     logger.info("key " + key + " value for exception " + value);
+                    delay = String.valueOf(0);
                 }
                 counter++;
             }
