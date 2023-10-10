@@ -59,7 +59,7 @@ echo "INPUT_PATH1 = $INPUT_PATH1"
 echo "INPUT_PATH2 = $INPUT_PATH2"
 echo "OUTPUT_PUTH = $OUTPUT_PATH"
 echo "-------------------------------------"
-:q
+
 mapReduceArguments=(
   "$APP_PATH"
   "com.globallogic.bdpc.mapreduce.avgdelays.JoinDriver"

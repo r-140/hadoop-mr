@@ -11,11 +11,14 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 //https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
 public class JoinDriver {
+
+    final static Logger logger = Logger.getLogger(JoinDriver.class);
     public static void main(final String[] args) throws Exception {
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "Hadoop Data Join");
@@ -29,8 +32,9 @@ public class JoinDriver {
         job.setOutputValueClass(Text.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        System.out.println("arg[0] " + args[0]);
-        System.out.println("arg[1] " + args[1]);
+        logger.info("arg[0] " + args[0]);
+
+        logger.info("arg[1] " + args[1]);
 
         MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, JoinMapperAirlineName.class);
 
@@ -64,14 +68,14 @@ public class JoinDriver {
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
-            System.out.println("Key " + key);
+            logger.info("Key " + key);
             String airLineName = "";
             String delay = "";
 //            double delay_avg;
             int counter = 0;
             for(Text value : values) {
                 if(counter < 4) {
-                    System.out.println("VALUE " + value);
+                    logger.info("VALUE " + value);
                 }
                 if (value.toString().startsWith("name")) {
                     airLineName = value.toString().split(":")[1];
@@ -82,7 +86,7 @@ public class JoinDriver {
             }
             counter = 0;
             String merge = key + "," + airLineName + "," + delay;
-            System.out.println("output after reducing " + merge);
+            logger.info("output after reducing " + merge);
             context.write(NullWritable.get(), new Text(merge));
         }
     }
