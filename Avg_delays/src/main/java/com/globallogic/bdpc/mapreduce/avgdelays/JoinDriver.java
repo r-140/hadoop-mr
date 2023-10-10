@@ -63,11 +63,11 @@ public class JoinDriver {
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
 
-            logger.info("JoinMapperDelay KEy " + key);
+//            logger.info("JoinMapperDelay Key " + key);
             String[] words = value.toString().split(",");
-            for(int i =0 ; i < words.length; i++) {
-                logger.info(" ith column flights" + i + " count " + words[i]);
-            }
+//            for(int i =0 ; i < words.length; i++) {
+//                logger.info(" ith column flights" + i + " count " + words[i]);
+//            }
             context.write(new Text(words[3]), new Text("delay:" + words[11]));
         }
     }
@@ -82,10 +82,10 @@ public class JoinDriver {
 //            double delay_avg;
             int counter = 0;
             for(Text value : values) {
-//                if(counter < 4) {
-//                    logger.info("VALUE " + value);
-//                }
-                logger.info("Key " + key + ", VALUE " + value);
+                if(counter < 4) {
+                    logger.info("Key reducer " + key + ", VALUE " + value);
+                }
+
                 try {
                     if (value.toString().startsWith("name")) {
                         airLineName = value.toString().split(":")[1];
@@ -93,7 +93,7 @@ public class JoinDriver {
                         delay = value.toString().split(":")[1];
                     }
                 } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-                    logger.info("value for exception " + value);
+                    logger.info("key " + key + " value for exception " + value);
                 }
                 counter++;
             }
