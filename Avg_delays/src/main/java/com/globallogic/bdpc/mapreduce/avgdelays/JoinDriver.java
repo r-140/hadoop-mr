@@ -37,13 +37,15 @@ public class JoinDriver {
         job.setOutputValueClass(Text.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        logger.info("arg[0] " + args[0]);
+        Path airlinesPath = new Path(args[0]);
+        Path flightsPath = new Path(args[1]);
 
-        logger.info("arg[1] " + args[1]);
+        MultipleInputs.addInputPath(job, airlinesPath, TextInputFormat.class, JoinMapperAirlineName.class);
 
-        MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, JoinMapperAirlineName.class);
+        MultipleInputs.addInputPath(job, flightsPath, TextInputFormat.class, JoinMapperDelay.class);
 
-        MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, JoinMapperDelay.class);
+        job.addCacheFile(airlinesPath.toUri());
+        job.addCacheFile(flightsPath.toUri());
 
 //        JobClient.runJob(job).waitForCompletion();
 
@@ -56,6 +58,8 @@ public class JoinDriver {
         String header;
 
         private Configuration conf;
+
+        private static final String AIRLINES_FILE_NAME = "airlines.csv";
         @Override
         protected void setup(Mapper.Context context) throws IOException, InterruptedException {
             conf = context.getConfiguration();
@@ -64,11 +68,13 @@ public class JoinDriver {
                 Path patternsPath = new Path(patternsURI.getPath());
                 String patternsFileName = patternsPath.getName();
                 logger.info("airlines patternsFileName " + patternsFileName);
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
-                header = bufferedReader.readLine();
-                headerList = header.split(",");
-                logger.info("airline header " + header);
-                logger.info("airline header List " + Arrays.toString(headerList));
+                if(AIRLINES_FILE_NAME.equals(patternsFileName)) {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
+                    header = bufferedReader.readLine();
+                    headerList = header.split(",");
+                    logger.info("airline header " + header);
+                    logger.info("airline header List " + Arrays.toString(headerList));
+                }
             }
         }
         public void map(Object key, Text value, Context context)
@@ -93,6 +99,8 @@ public class JoinDriver {
 
         private Configuration conf;
 
+        private static final String FLIGHTS_FILE_NAME = "flights.csv";
+
         int counter;
         @Override
         protected void setup(Mapper.Context context) throws IOException, InterruptedException {
@@ -101,12 +109,15 @@ public class JoinDriver {
             for (URI patternsURI : patternsURIs) {
                 Path patternsPath = new Path(patternsURI.getPath());
                 String patternsFileName = patternsPath.getName();
+
                 logger.info("flights patternsFileName " + patternsFileName);
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
-                header = bufferedReader.readLine();
-                headerList = header.split(",");
-                logger.info("delay header " + header);
-                logger.info("delay header List " + Arrays.toString(headerList));
+                if(FLIGHTS_FILE_NAME.equals(patternsFileName)) {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
+                    header = bufferedReader.readLine();
+                    headerList = header.split(",");
+                    logger.info("delay header " + header);
+                    logger.info("delay header List " + Arrays.toString(headerList));
+                }
             }
         }
 
