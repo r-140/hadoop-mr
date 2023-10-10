@@ -13,10 +13,15 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
 
 //https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
 public class JoinDriver {
+
 
     final static Logger logger = Logger.getLogger(JoinDriver.class);
     public static void main(final String[] args) throws Exception {
@@ -47,28 +52,79 @@ public class JoinDriver {
     }
 
     public static class JoinMapperAirlineName extends Mapper<Object, Text, Text, Text> {
+        String[] headerList;
+        String header;
+
+        private Configuration conf;
+        @Override
+        protected void setup(Mapper.Context context) throws IOException, InterruptedException {
+            conf = context.getConfiguration();
+            URI[] patternsURIs = Job.getInstance(conf).getCacheFiles();
+            for (URI patternsURI : patternsURIs) {
+                Path patternsPath = new Path(patternsURI.getPath());
+                String patternsFileName = patternsPath.getName();
+                logger.info("airlines patternsFileName " + patternsFileName);
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
+                header = bufferedReader.readLine();
+                headerList = header.split(",");
+                logger.info("airline header " + header);
+                logger.info("airline header List " + Arrays.toString(headerList));
+            }
+        }
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
             logger.info("JoinMapperAirlineName KEy " + key);
+            String line = value.toString();
+            String[] values = value.toString().split(",");
 
-            String[] words = value.toString().split(",");
-            for(int i =0 ; i < words.length; i++) {
-                logger.info(" ith column of airlines " + i + " count " + words[i]);
+            if(headerList.length == values.length && !header.equals(line)) {
+                logger.info("airline values " + Arrays.toString(values));
+                for(int i = 0; i < values.length; i++) {
+                    context.write(new Text(values[0]), new Text("name:" + values[1]));
+                }
             }
-            context.write(new Text(words[0]), new Text("name:" + words[1]));
         }
     }
 
     public static class JoinMapperDelay extends Mapper<Object, Text, Text, Text> {
+
+        String[] headerList;
+        String header;
+
+        private Configuration conf;
+
+        int counter;
+        @Override
+        protected void setup(Mapper.Context context) throws IOException, InterruptedException {
+            conf = context.getConfiguration();
+            URI[] patternsURIs = Job.getInstance(conf).getCacheFiles();
+            for (URI patternsURI : patternsURIs) {
+                Path patternsPath = new Path(patternsURI.getPath());
+                String patternsFileName = patternsPath.getName();
+                logger.info("flights patternsFileName " + patternsFileName);
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
+                header = bufferedReader.readLine();
+                headerList = header.split(",");
+                logger.info("delay header " + header);
+                logger.info("delay header List " + Arrays.toString(headerList));
+            }
+        }
+
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
 
-//            logger.info("JoinMapperDelay Key " + key);
-            String[] words = value.toString().split(",");
-//            for(int i =0 ; i < words.length; i++) {
-//                logger.info(" ith column flights" + i + " count " + words[i]);
-//            }
-            context.write(new Text(words[3]), new Text("delay:" + words[11]));
+            String line = value.toString();
+            String[] values = value.toString().split(",");
+
+            if(headerList.length == values.length && !header.equals(line)) {
+                if(counter < 4) {
+                    logger.info("airline values " + Arrays.toString(values));
+                }
+                for(int i = 0; i < values.length; i++) {
+                    context.write(new Text(values[3]), new Text("name:" + values[11]));
+                    counter++;
+                }
+            }
         }
     }
 
