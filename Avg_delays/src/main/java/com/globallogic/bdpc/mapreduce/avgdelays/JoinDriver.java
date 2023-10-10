@@ -49,8 +49,12 @@ public class JoinDriver {
     public static class JoinMapperAirlineName extends Mapper<Object, Text, Text, Text> {
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
+            logger.info("JoinMapperAirlineName KEy " + key);
 
             String[] words = value.toString().split(",");
+            for(int i =0 ; i < words.length; i++) {
+                logger.info(" ith column of airlines " + i + " count " + words[i]);
+            }
             context.write(new Text(words[0]), new Text("name:" + words[1]));
         }
     }
@@ -59,7 +63,11 @@ public class JoinDriver {
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
 
+            logger.info("JoinMapperDelay KEy " + key);
             String[] words = value.toString().split(",");
+            for(int i =0 ; i < words.length; i++) {
+                logger.info(" ith column flights" + i + " count " + words[i]);
+            }
             context.write(new Text(words[3]), new Text("delay:" + words[11]));
         }
     }
@@ -68,19 +76,24 @@ public class JoinDriver {
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
-            logger.info("Key " + key);
+//            logger.info("Key " + key);
             String airLineName = "";
             String delay = "";
 //            double delay_avg;
             int counter = 0;
             for(Text value : values) {
-                if(counter < 4) {
-                    logger.info("VALUE " + value);
-                }
-                if (value.toString().startsWith("name")) {
-                    airLineName = value.toString().split(":")[1];
-                } else if (value.toString().startsWith("delay")){
-                    delay = value.toString().split(":")[1];
+//                if(counter < 4) {
+//                    logger.info("VALUE " + value);
+//                }
+                logger.info("Key " + key + ", VALUE " + value);
+                try {
+                    if (value.toString().startsWith("name")) {
+                        airLineName = value.toString().split(":")[1];
+                    } else if (value.toString().startsWith("delay")) {
+                        delay = value.toString().split(":")[1];
+                    }
+                } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+                    logger.info("value for exception " + value);
                 }
                 counter++;
             }
