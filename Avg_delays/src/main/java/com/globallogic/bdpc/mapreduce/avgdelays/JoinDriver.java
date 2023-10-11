@@ -32,8 +32,8 @@ public class JoinDriver {
         job.setJarByClass(JoinDriver.class);
 //        job.setNumReduceTasks(2);
         // job.setMapperClass(JoinMapper.class);
-        job.setCombinerClass(JoinReducer.class);
-        job.setReducerClass(AverageReducer.class);
+//        job.setCombinerClass(JoinReducer.class);
+        job.setReducerClass(JoinReducer.class);
 
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
@@ -138,7 +138,7 @@ public class JoinDriver {
                 throws IOException, InterruptedException {
             String airLineName = "";
             String delay = "";
-
+            double sum = 0;
             int counter = 0;
             for(Text value : values) {
                 if(counter < 4) {
@@ -151,13 +151,21 @@ public class JoinDriver {
                 } else if (valueStr.startsWith("delay")) {
                     delay = valueStr.endsWith(":") ? String.valueOf(0)
                             : valueStr.split(":")[1];
+                    sum += Double.parseDouble(delay);
                 }
 
-                String merge = airLineName + "," + delay;
-                context.write(key, new Text(merge));
+//                String merge = airLineName + "," + delay;
+//                context.write(key, new Text(merge));
 
                 counter++;
             }
+
+            double average = sum/counter;
+
+            logger.info("for the key " + key + " average delay " + average + " number of records " + counter);
+
+            String merge = airLineName + "," + average;
+            context.write(key, new Text(merge));
         }
     }
 
