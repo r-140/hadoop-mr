@@ -135,7 +135,7 @@ public class JoinDriver {
                     if(counter < 20 ) {
                         logger.info("flightskey " + values[4] + " delay " + values[11]);
                     }
-                    context.write(new Text(values[4]), new Text("name:" + values[11]));
+                    context.write(new Text(values[4]), new Text("delay:" + values[11]));
                     counter++;
                 }
             }
