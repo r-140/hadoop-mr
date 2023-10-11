@@ -17,7 +17,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.*;
 
 //https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
 public class JoinDriver {
@@ -79,12 +79,11 @@ public class JoinDriver {
         }
         public void map(Object key, Text value, Context context)
                 throws IOException, InterruptedException {
-            logger.info("JoinMapperAirlineName Key " + key);
             String line = value.toString();
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
-                logger.info("airline values " + Arrays.toString(values));
+//                logger.info("airline values " + Arrays.toString(values));
                 for(int i = 0; i < values.length; i++) {
                     context.write(new Text(values[0]), new Text("name:" + values[1]));
                 }
@@ -128,21 +127,16 @@ public class JoinDriver {
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
-                if(counter < 20) {
-                    logger.info("flight values " + Arrays.toString(values));
-                }
                 for(int i = 0; i < values.length; i++) {
-                    if(counter < 20 ) {
-                        logger.info("flightskey " + values[4] + " delay " + values[11]);
-                    }
                     context.write(new Text(values[4]), new Text("delay:" + values[11]));
-                    counter++;
                 }
             }
         }
     }
 
     public static class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
+
+        private Map<String, List<Double>> delayMap = new HashMap<>();
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
             String airLineName = "";
@@ -154,24 +148,30 @@ public class JoinDriver {
                     logger.info("Key reducer " + key + ", VALUE " + value);
                 }
 
-                try {
-                    String valueStr = value.toString();
-                    if (valueStr.startsWith("name")) {
-                        airLineName = valueStr.split(":")[1];
-                    } else if (valueStr.startsWith("delay")) {
-                        delay = valueStr.substring(valueStr.length()-1).equals(":") ? String.valueOf(0)
-                                : valueStr.split(":")[1];
-                    }
-                } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-                    logger.info("key " + key + " value for exception " + value);
-                    delay = String.valueOf(0);
+                String valueStr = value.toString();
+                if (valueStr.startsWith("name")) {
+                    airLineName = valueStr.split(":")[1];
+                } else if (valueStr.startsWith("delay")) {
+                    delay = valueStr.substring(valueStr.length()-1).equals(":") ? String.valueOf(0)
+                            : valueStr.split(":")[1];
                 }
+
+//                String keyStr = key.toString();
+//                if(delayMap.containsKey(keyStr)) {
+//                    delayMap.get(keyStr).add(Double.valueOf(delay));
+//                } else {
+//                    List<Double> delayLIst = new ArrayList<>();
+//                    delayLIst.add(Double.valueOf(delay));
+//                    delayMap.put(keyStr, delayLIst);
+//                }
+//
+                String merge = key + "," + airLineName + "," + delay;
+//                logger.info("output after reducing " + merge);
+                context.write(NullWritable.get(), new Text(merge));
+
                 counter++;
             }
-            counter = 0;
-            String merge = key + "," + airLineName + "," + delay;
-            logger.info("output after reducing " + merge);
-            context.write(NullWritable.get(), new Text(merge));
+
         }
     }
 }
