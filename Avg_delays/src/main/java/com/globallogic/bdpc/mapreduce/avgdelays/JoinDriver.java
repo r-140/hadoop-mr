@@ -128,10 +128,13 @@ public class JoinDriver {
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
-                if(counter < 4) {
+                if(counter < 20) {
                     logger.info("flight values " + Arrays.toString(values));
                 }
                 for(int i = 0; i < values.length; i++) {
+                    if(counter < 20 ) {
+                        logger.info("flightskey " + values[4] + " delay " + values[11]);
+                    }
                     context.write(new Text(values[4]), new Text("name:" + values[11]));
                     counter++;
                 }
