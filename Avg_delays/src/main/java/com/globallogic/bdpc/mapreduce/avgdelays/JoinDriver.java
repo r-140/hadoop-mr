@@ -200,19 +200,19 @@ public class JoinDriver {
             logger.info("sortedMap " + sortedByAvgMap);
             logger.info("airlinesMap " + airlinesMap);
 
-            String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
+//            String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
 
-            logger.info("Final result " + merge);
+//            logger.info("Final result " + merge);
 
-            context.write(NullWritable.get(), new Text(merge));
-//            writeResult(context, sortedByAvgMap);
+//            context.write(NullWritable.get(), new Text(merge));
+            writeResult(context, sortedByAvgMap);
         }
         private void writeResult(Context context, Map<String, Double> sortedByAvgMap) throws InterruptedException, IOException {
 
 //            Set<String> keySet = sortedByAvgMap.keySet();
             sortedByAvgMap.entrySet().stream().limit(NUMBER_ELEMENTS_TO_OUTPUT).forEach(entry -> {
                 String merge = entry.getKey() + "," + airlinesMap.get(entry.getKey()) + "," + entry.getValue();
-
+                logger.info("Final result " + merge);
                 try {
                     context.write(NullWritable.get(), new Text(merge));
                 } catch (IOException | InterruptedException e) {
