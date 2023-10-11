@@ -177,15 +177,16 @@ public class JoinDriver {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
+            sortedByAvgMap.keySet().forEach(k -> logger.info("result key " + k));
+
             sortedByAvgMap.entrySet().stream().limit(NUMBER_ELEMENTS_TO_OUTPUT).forEach(entry  -> {
-                String merge = key + "," + airlinesMap.get(key.toString()) + "," + entry.getValue();
+                String merge = entry.getKey() + "," + airlinesMap.get(entry.getKey()) + "," + entry.getValue();
                 logger.info("result " + merge);
                 try {
                     context.write(NullWritable.get(), new Text(merge));
                 } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
             });
         }
     }
