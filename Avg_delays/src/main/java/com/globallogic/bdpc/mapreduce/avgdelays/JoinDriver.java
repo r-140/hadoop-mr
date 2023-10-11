@@ -139,15 +139,15 @@ public class JoinDriver {
     public static class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
 
         private static final int NUMBER_ELEMENTS_TO_OUTPUT = 5;
-        private Map<String, List<Double>> delayMap = new HashMap<>();
-        private Map<String, String> airlinesMap = new HashMap<>();
+        private final Map<String, List<Double>> delayMap = new HashMap<>();
+        private final Map<String, String> airlinesMap = new HashMap<>();
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
             String airLineName = "";
             String delay = "";
 
             int counter = 0;
-            String keyStr = key.toString();
+            final String keyStr = key.toString().trim();
             for(Text value : values) {
                 if(counter < 4) {
                     logger.info("Key reducer " + key + ", VALUE " + value);
@@ -162,13 +162,16 @@ public class JoinDriver {
                     if (delayMap.containsKey(keyStr)) {
                         delayMap.get(keyStr).add(Double.valueOf(delay));
                     } else {
-                        List<Double> delayLIst = new ArrayList<>();
-                        delayLIst.add(Double.valueOf(delay));
-                        delayMap.put(keyStr, delayLIst);
+                        List<Double> delayList = new ArrayList<>();
+                        delayList.add(Double.valueOf(delay));
+                        delayMap.put(keyStr, delayList);
                     }
                 }
                 counter++;
             }
+
+            delayMap.keySet().forEach(k -> logger.info("DelayMap key " + k));
+
             final Map<String, Double> avgDelayMap = new HashMap<>();
             delayMap.forEach((k, v) -> avgDelayMap.put(k, v.stream().mapToDouble(Double::doubleValue).average().orElse(0)));
 
@@ -177,7 +180,9 @@ public class JoinDriver {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-            sortedByAvgMap.keySet().forEach(k -> logger.info("result key " + k));
+//            sortedByAvgMap.keySet().forEach(k -> logger.info("result key " + k));
+
+            sortedByAvgMap.forEach((k, v) -> logger.info("sortedByAvgMap key " + key + " value " + v));
 
             sortedByAvgMap.entrySet().stream().limit(NUMBER_ELEMENTS_TO_OUTPUT).forEach(entry  -> {
                 String merge = entry.getKey() + "," + airlinesMap.get(entry.getKey()) + "," + entry.getValue();
