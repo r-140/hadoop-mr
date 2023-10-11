@@ -32,8 +32,8 @@ public class JoinDriver {
         job.setJarByClass(JoinDriver.class);
 //        job.setNumReduceTasks(2);
         // job.setMapperClass(JoinMapper.class);
-//        job.setCombinerClass(JoinReducer.class);
-        job.setReducerClass(JoinReducer.class);
+        job.setCombinerClass(JoinReducer.class);
+        job.setReducerClass(AverageReducer.class);
 
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
@@ -172,44 +172,37 @@ public class JoinDriver {
     public static class AverageReducer extends Reducer<Text, Text, NullWritable, Text> {
 
         private static final int NUMBER_ELEMENTS_TO_OUTPUT = 5;
-        private Map<String, List<Double>> delayMap = new HashMap<>();
+        private Map<String, Double> delayMap = new HashMap<>();
         private Map<String, String> airlinesMap = new HashMap<>();
 
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
-            int counter = 0;
             String airlineName = "";
+
             for (Text value : values) {
-                if (counter < 4) {
-                    logger.info("Key average reducer " + key + ", VALUE " + value);
-                }
+                logger.info("Average reducer key " + key + " value " + value);
                 String[] valueArr = value.toString().split(",");
                 airlineName = valueArr[0];
                 airlinesMap.put(key.toString(), airlineName);
+
                 double delay = Double.parseDouble(valueArr[1]);
 
                 String keyStr = key.toString();
-                if (delayMap.containsKey(keyStr)) {
-                    delayMap.get(keyStr).add(delay);
-                } else {
-                    List<Double> delayLIst = new ArrayList<>();
-                    delayLIst.add(delay);
-                    delayMap.put(keyStr, delayLIst);
-                }
-
-                counter++;
+                delayMap.put(keyStr, delay);
             }
 
-            final Map<String, Double> avgDelayMap = new HashMap<>();
-            delayMap.forEach((k, v) -> avgDelayMap.put(k, v.stream().mapToDouble(Double::doubleValue).average().orElse(0)));
-
-            Map<String, Double> sortedByAvgMap = avgDelayMap.entrySet().stream()
+            final Map<String, Double> sortedByAvgMap = delayMap.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
+            logger.info("sortedMap " + sortedByAvgMap);
+            logger.info("airlinesMap " + airlinesMap);
+
             String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
+
+            logger.info("Final result " + merge);
 
             context.write(NullWritable.get(), new Text(merge));
 //            writeResult(context, sortedByAvgMap);
