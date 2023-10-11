@@ -134,9 +134,9 @@ public class JoinDriver {
         }
     }
 
-    public static class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
+    public static class JoinReducer extends Reducer<Text, Text, Text, Text> {
 
-        private Map<String, List<Double>> delayMap = new HashMap<>();
+//        private Map<String, List<Double>> delayMap = new HashMap<>();
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
             String airLineName = "";
@@ -165,9 +165,9 @@ public class JoinDriver {
 //                    delayMap.put(keyStr, delayLIst);
 //                }
 //
-                String merge = key + "," + airLineName + "," + delay;
+                String merge = airLineName + "," + delay;
 //                logger.info("output after reducing " + merge);
-                context.write(NullWritable.get(), new Text(merge));
+                context.write(key, new Text(merge));
 
                 counter++;
             }
