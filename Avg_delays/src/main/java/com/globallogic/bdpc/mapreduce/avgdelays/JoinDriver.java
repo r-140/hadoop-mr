@@ -2,7 +2,6 @@ package com.globallogic.bdpc.mapreduce.avgdelays;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -30,7 +29,7 @@ public class JoinDriver {
         Job job = Job.getInstance(conf, "Hadoop Data Join");
 
         job.setJarByClass(JoinDriver.class);
-        job.setNumReduceTasks(2);
+//        job.setNumReduceTasks(2);
         // job.setMapperClass(JoinMapper.class);
         job.setReducerClass(JoinReducer.class);
         job.setMapOutputKeyClass(Text.class);
@@ -85,10 +84,11 @@ public class JoinDriver {
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
-//                logger.info("airline values " + Arrays.toString(values));
-                for(int i = 0; i < values.length; i++) {
-                    context.write(new Text(values[0]), new Text("name:" + values[1]));
-                }
+                logger.info("airline values " + Arrays.toString(values));
+                context.write(new Text(values[0]), new Text("name:" + values[1]));
+//                for(int i = 0; i < values.length; i++) {
+//                    context.write(new Text(values[0]), new Text("name:" + values[1]));
+//                }
             }
         }
     }
@@ -129,70 +129,41 @@ public class JoinDriver {
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
-                for(int i = 0; i < values.length; i++) {
-                    context.write(new Text(values[4]), new Text("delay:" + values[11]));
-                }
+                context.write(new Text(values[4]), new Text("delay:" + values[11]));
+//                for(int i = 0; i < values.length; i++) {
+//                    context.write(new Text(values[4]), new Text("delay:" + values[11]));
+//                }
             }
         }
     }
 
-    public static class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
+    public static class JoinReducer extends Reducer<Text, Text, Text, Text> {
 
-        private static final int NUMBER_ELEMENTS_TO_OUTPUT = 5;
-        private final Map<String, List<Double>> delayMap = new HashMap<>();
-        private final Map<String, String> airlinesMap = new HashMap<>();
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
             String airLineName = "";
             String delay = "";
 
             int counter = 0;
-            final String keyStr = key.toString().trim();
             for(Text value : values) {
                 if(counter < 4) {
                     logger.info("Key reducer " + key + ", VALUE " + value);
                 }
+
                 String valueStr = value.toString();
                 if (valueStr.startsWith("name")) {
                     airLineName = valueStr.split(":")[1];
-                    airlinesMap.put(keyStr, airLineName);
                 } else if (valueStr.startsWith("delay")) {
                     delay = valueStr.endsWith(":") ? String.valueOf(0)
                             : valueStr.split(":")[1];
-                    if (delayMap.containsKey(keyStr)) {
-                        delayMap.get(keyStr).add(Double.valueOf(delay));
-                    } else {
-                        List<Double> delayList = new ArrayList<>();
-                        delayList.add(Double.valueOf(delay));
-                        delayMap.put(keyStr, delayList);
-                    }
                 }
+
+                String merge = airLineName + "," + delay;
+//                logger.info("output after reducing " + merge);
+                context.write(key, new Text(merge));
+
                 counter++;
             }
-
-            delayMap.keySet().forEach(k -> logger.info("DelayMap key " + k));
-
-            final Map<String, Double> avgDelayMap = new HashMap<>();
-            delayMap.forEach((k, v) -> avgDelayMap.put(k, v.stream().mapToDouble(Double::doubleValue).average().orElse(0)));
-
-            Map<String, Double> sortedByAvgMap = avgDelayMap.entrySet().stream()
-                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-
-//            sortedByAvgMap.keySet().forEach(k -> logger.info("result key " + k));
-
-            sortedByAvgMap.forEach((k, v) -> logger.info("sortedByAvgMap key " + key + " value " + v));
-
-            sortedByAvgMap.entrySet().stream().limit(NUMBER_ELEMENTS_TO_OUTPUT).forEach(entry  -> {
-                String merge = entry.getKey() + "," + airlinesMap.get(entry.getKey()) + "," + entry.getValue();
-                logger.info("result " + merge);
-                try {
-                    context.write(NullWritable.get(), new Text(merge));
-                } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
         }
     }
 
@@ -236,21 +207,16 @@ public class JoinDriver {
 //                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
 //                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 //
-//            sortedByAvgMap.entrySet().stream().limit(NUMBER_ELMENTS_TO_OUTPUT).forEach(entry  -> {
-//                String merge = key.toString() + "," + airlinesMap.get(key.toString()) + "," + entry.getValue();
-//
-//                try {
-//                    context.write(key, new Text(merge));
-//                } catch (IOException | InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//
-//            });
 //
 //        }
-//        private void fillResult(Context context, Text key,  Map<String, Double> sortedByAvgMap) {
-//            sortedByAvgMap.entrySet().stream().limit(NUMBER_ELMENTS_TO_OUTPUT).forEach(entry  -> {
-//                String merge = key.toString() + "," + airlinesMap.get(key.toString()) + "," + entry.getValue();
+//        private void fillResult(Context context, Text key,  Map<String, Double> sortedByAvgMap) throws InterruptedException, IOException {
+//
+//            Set<String> keySet = sortedByAvgMap.keySet();
+//
+//
+//
+//            sortedByAvgMap.entrySet().stream().limit(5).forEach((k, v) -> {
+//                String merge = key.toString() + "," + airlinesMap.get(key.toString()) + "," + v;
 //
 //                try {
 //                    context.write(key, new Text(merge));
