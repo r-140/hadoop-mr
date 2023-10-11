@@ -175,6 +175,8 @@ public class JoinDriver {
         private Map<String, Double> delayMap = new HashMap<>();
         private Map<String, String> airlinesMap = new HashMap<>();
 
+        private boolean IS_WRITE = true;
+
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
@@ -201,11 +203,15 @@ public class JoinDriver {
             logger.info("airlinesMap " + airlinesMap);
 
 //            String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
-
+//
 //            logger.info("Final result " + merge);
 
 //            context.write(NullWritable.get(), new Text(merge));
-            writeResult(context, sortedByAvgMap);
+//            no need to run the same result for all keys
+            if(IS_WRITE) {
+                writeResult(context, sortedByAvgMap);
+                IS_WRITE = false;
+            }
         }
         private void writeResult(Context context, Map<String, Double> sortedByAvgMap) throws InterruptedException, IOException {
 
