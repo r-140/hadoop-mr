@@ -24,20 +24,15 @@ public class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
         double sum = 0;
         int counter = 0;
         for(Text value : values) {
-            if(counter < 4) {
-                logger.info("Key reducer " + key + ", value " + value);
-            }
-
-            String valueStr = value.toString();
+            final String valueStr = value.toString();
             if (valueStr.startsWith(NAME_PREFIX)) {
                 airLineName = valueStr.split(VALUE_SEPARATOR)[1];
             } else if (valueStr.startsWith(DELAY_PREFIX)) {
                 delay = valueStr.endsWith(VALUE_SEPARATOR) ? String.valueOf(0)
                         : valueStr.split(VALUE_SEPARATOR)[1];
                 sum += Double.parseDouble(delay);
+                counter++;
             }
-
-            counter++;
         }
 
         double average = sum/counter;

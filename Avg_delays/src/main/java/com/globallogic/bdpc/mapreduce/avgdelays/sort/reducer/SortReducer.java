@@ -14,11 +14,6 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
     final static Logger logger = Logger.getLogger(JoinReducer.class);
     private static final String COMMA_SEPARATOR = ", ";
 
-//    @Override
-//    public void setup(Context context) throws IOException, InterruptedException {
-//        tmap2 = new TreeMap<>(Collections.reverseOrder());
-//    }
-
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
