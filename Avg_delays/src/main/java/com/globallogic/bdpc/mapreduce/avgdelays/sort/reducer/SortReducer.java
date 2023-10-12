@@ -1,15 +1,15 @@
 package com.globallogic.bdpc.mapreduce.avgdelays.sort.reducer;
 
 import com.globallogic.bdpc.mapreduce.avgdelays.join.reducer.JoinReducer;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -41,16 +41,16 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
         if (tmap2.size() > MAX_RESULT) {
             tmap2.remove(tmap2.firstKey());
         }
-
-//        String merge = airline + ", " + delay;
-//
-//        logger.info("SortReducer result " + merge);
-////        resultList.add(merge);
-//        context.write(NullWritable.get(), new Text(merge));
     }
 
     @Override
     public void cleanup(Context context) throws IOException, InterruptedException {
+
+        Path outputPath = new Path(context.getConfiguration().get("output") + "/" + "result");
+        SequenceFile.Writer writer = SequenceFile.createWriter(context.getConfiguration(),
+                SequenceFile.Writer.file(outputPath),
+                SequenceFile.Writer.keyClass(Text.class),
+                SequenceFile.Writer.valueClass(Text.class));
 
         for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
             double delay = entry.getKey();
@@ -65,9 +65,3 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
     }
 }
 
-//    @Override
-//    public void cleanup(Context context) throws IOException, InterruptedException {
-//        for (int i =0; i<=NUMBER_TO_OUTPUT; i++) {
-//            context.write(NullWritable.get(), new Text(resultList.get(i)));
-//        }
-//    }
