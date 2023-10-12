@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 //import java.util.stream.Collectors;
 
 //https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
@@ -31,9 +32,9 @@ public class JoinDriver {
         job.setJarByClass(JoinDriver.class);
 //        job.setNumReduceTasks(2);
         // job.setMapperClass(JoinMapper.class);
-        job.setCombinerClass(JoinReducer.class);
+//        job.setCombinerClass(JoinReducer.class);
 //        job.setSortComparatorClass(ValueComparator.class);
-        job.setReducerClass(SortReducer.class);
+        job.setReducerClass(JoinReducer.class);
 
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
@@ -143,7 +144,7 @@ public class JoinDriver {
         }
     }
 
-    public static class JoinReducer extends Reducer<Text, Text, Text, Text> {
+    public static class JoinReducer extends Reducer<Text, Text, Text, DoubleWritable> {
 
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
@@ -172,15 +173,15 @@ public class JoinDriver {
 
             logger.info("for the key " + key + " average delay " + average + " number of records " + counter);
 
-            String merge = airLineName + "," + average;
-            context.write(key, new Text(merge));
+            String mergedKey = key + ", " + airLineName;
+            context.write(new Text(mergedKey), new DoubleWritable(average));
         }
     }
 
     public static class SortReducer extends Reducer<Text, Text, Text, DoubleWritable> {
 
-//        private Map<String, Double> delayMap = new HashMap<>();
-//        private Map<String, String> airlinesMap = new HashMap<>();
+        private Map<String, Double> delayMap = new HashMap<>();
+        private Map<String, String> airlinesMap = new HashMap<>();
 
         public void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
@@ -191,25 +192,25 @@ public class JoinDriver {
                 logger.info("Average reducer key " + key + " value " + value);
                 String[] valueArr = value.toString().split(",");
                 airlineName = valueArr[0];
-//                airlinesMap.put(key.toString(), airlineName);
+                airlinesMap.put(key.toString(), airlineName);
 
                 delay = Double.parseDouble(valueArr[1]);
 
-//                String keyStr = key.toString();
-//                delayMap.put(keyStr, delay);
+                String keyStr = key.toString();
+                delayMap.put(keyStr, delay);
             }
 
-//            final LinkedHashMap<String, Double> sortedByAvgMap = delayMap.entrySet().stream()
-//                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-//                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-//                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-//
-//            logger.info("sortedMap " + sortedByAvgMap);
-//            logger.info("airlinesMap " + airlinesMap);
+            final LinkedHashMap<String, Double> sortedByAvgMap = delayMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-//            String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
+            logger.info("sortedMap " + sortedByAvgMap);
+            logger.info("airlinesMap " + airlinesMap);
 
-//            logger.info("Final result " + merge);
+            String merge = key + "," + airlinesMap.get(key.toString()) + "," + sortedByAvgMap.get(key.toString());
+
+            logger.info("Final result " + merge);
 
             context.write(new Text(key + ", " + airlineName), new DoubleWritable(delay));
         }
