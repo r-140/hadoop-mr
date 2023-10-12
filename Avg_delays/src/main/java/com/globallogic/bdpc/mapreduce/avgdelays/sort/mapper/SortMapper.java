@@ -41,7 +41,7 @@ public class SortMapper extends Mapper<Object, Object, Text, DoubleWritable> {
         logger.info("splitted values " + Arrays.toString(values));
 
         String outputKey = values[0] + ", " + values[1];
-        String delayStr = values[3].split(":")[1];
+        String delayStr = values[2].split(":")[1];
         logger.info("delay value " + delayStr);
 
         double delay = Double.parseDouble(delayStr);

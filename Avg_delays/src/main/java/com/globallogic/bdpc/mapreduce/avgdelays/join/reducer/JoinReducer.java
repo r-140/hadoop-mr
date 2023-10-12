@@ -40,7 +40,8 @@ public class JoinReducer extends Reducer<Text, Text, NullWritable, Text> {
 
         logger.info("for the key " + key + " average delay " + average + " number of records " + counter);
 
-        String merged = key + ":::" + airLineName + ":::" + "DELAY:" + average;
+        final String merged = key + ":::" + airLineName + ":::" + "DELAY:" + average;
+        logger.info("JOINREDUCER OUTPUT " + merged);
         context.write(NullWritable.get(), new Text(merged));
     }
 }
