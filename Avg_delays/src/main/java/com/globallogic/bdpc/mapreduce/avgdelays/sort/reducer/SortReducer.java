@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
-public class SortReducer extends Reducer<Text, DoubleWritable, NullWritable, Text> {
+public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Text> {
 
     final static Logger logger = Logger.getLogger(JoinReducer.class);
 
