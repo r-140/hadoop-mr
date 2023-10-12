@@ -38,22 +38,18 @@ public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
 
         tmap.put(delay, outputKey);
 
+        logger.info("SortMapper ouput " + outputKey + " delay " + delay);
         if(tmap.size() > MAX_RESULT) {
             tmap.remove(tmap.firstKey());
         }
-
-//        context.write(new DoubleWritable(delay), new Text(outputKey));
     }
 
     @Override
     public void cleanup(Context context)
-            throws IOException, InterruptedException
-    {
-        for (Map.Entry<Double, String> entry :  tmap.entrySet()) {
-
+            throws IOException, InterruptedException {
+        for (Map.Entry<Double, String> entry : tmap.entrySet()) {
             Double delay = entry.getKey();
             String outputKey = entry.getValue();
-
             context.write(new DoubleWritable(delay), new Text(outputKey));
         }
     }

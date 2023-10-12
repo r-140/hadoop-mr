@@ -11,32 +11,59 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Text> {
 
     final static Logger logger = Logger.getLogger(JoinReducer.class);
 
-//    private List<String> resultList = new ArrayList<>();
+    private TreeMap<Double, String> tmap2;
 
+    private static final int MAX_RESULT = 5;
 
+    @Override
+    public void setup(Context context) throws IOException, InterruptedException {
+        tmap2 = new TreeMap<>();
+    }
 
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
         logger.info("SortReducer key " + key);
-        double delay = key.get();
+        Double delay = key.get();
         String airline = "";
         for (Text value : values) {
-            logger.info("sort reducer key " + key + " value " + value);
             airline = value.toString();
-
         }
-        String merge = airline + ", " + delay;
 
-        logger.info("SortReducer result " + merge);
-//        resultList.add(merge);
-        context.write(NullWritable.get(), new Text(merge));
+        tmap2.put(delay, airline);
+
+        if (tmap2.size() > MAX_RESULT) {
+            tmap2.remove(tmap2.firstKey());
+        }
+
+//        String merge = airline + ", " + delay;
+//
+//        logger.info("SortReducer result " + merge);
+////        resultList.add(merge);
+//        context.write(NullWritable.get(), new Text(merge));
     }
+
+    @Override
+    public void cleanup(Context context) throws IOException, InterruptedException {
+
+        for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
+            double delay = entry.getKey();
+            String airline = entry.getValue();
+
+            String merge = airline + ", " + delay;
+
+            logger.info("SortReducer result " + merge);
+
+            context.write(NullWritable.get(), new Text(merge));
+        }
+    }
+}
 
 //    @Override
 //    public void cleanup(Context context) throws IOException, InterruptedException {
@@ -44,4 +71,3 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
 //            context.write(NullWritable.get(), new Text(resultList.get(i)));
 //        }
 //    }
-}
