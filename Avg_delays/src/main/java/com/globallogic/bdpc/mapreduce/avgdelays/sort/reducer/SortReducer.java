@@ -47,24 +47,24 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
     @Override
     public void cleanup(Context context) throws IOException, InterruptedException {
 
-        Path outputPath = new Path(context.getConfiguration().get("output") + "/" + "result");
-        SequenceFile.Writer writer = SequenceFile.createWriter(context.getConfiguration(),
-                SequenceFile.Writer.file(outputPath),
-                SequenceFile.Writer.keyClass(NullWritable.class),
-                SequenceFile.Writer.valueClass(Text.class));
+//        Path outputPath = new Path(context.getConfiguration().get("output") + "/" + "result");
+//        SequenceFile.Writer writer = SequenceFile.createWriter(context.getConfiguration(),
+//                SequenceFile.Writer.file(outputPath),
+//                SequenceFile.Writer.keyClass(NullWritable.class),
+//                SequenceFile.Writer.valueClass(Text.class));
 
         for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
             double delay = entry.getKey();
             String airline = entry.getValue();
 
-            String merge = airline + ", " + delay;
+            final String merge = airline + ", " + delay;
 
             logger.info("SortReducer result " + merge);
-            writer.append(NullWritable.get(), new Text(merge));
-//            context.write(NullWritable.get(), new Text(merge));
+//            writer.append(NullWritable.get(), new Text(merge));
+            context.write(NullWritable.get(), new Text(merge));
         }
 
-        writer.close();
+//        writer.close();
     }
 }
 
