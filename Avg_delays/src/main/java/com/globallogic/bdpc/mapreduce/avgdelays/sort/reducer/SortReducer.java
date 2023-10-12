@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,7 +24,7 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
-        tmap2 = new TreeMap<>();
+        tmap2 = new TreeMap<>(Collections.reverseOrder());
     }
 
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
@@ -59,9 +60,11 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
             String merge = airline + ", " + delay;
 
             logger.info("SortReducer result " + merge);
-
-            context.write(NullWritable.get(), new Text(merge));
+            writer.append(NullWritable.get(), new Text(merge));
+//            context.write(NullWritable.get(), new Text(merge));
         }
+
+        writer.close();
     }
 }
 

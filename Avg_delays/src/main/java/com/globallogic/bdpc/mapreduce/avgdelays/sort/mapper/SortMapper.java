@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,7 +21,7 @@ public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
     @Override
     public void setup(Context context)
             throws IOException, InterruptedException {
-        tmap = new TreeMap<Double, String>();
+        tmap = new TreeMap<>(Collections.reverseOrder());
     }
 
     public void map(Object key, Object value, Context context)
