@@ -8,10 +8,17 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Text> {
 
     final static Logger logger = Logger.getLogger(JoinReducer.class);
+
+    private List<String> resultList = new ArrayList<>();
+
+    private int NUMBER_TO_OUTPUT = 5;
 
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
@@ -27,6 +34,14 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
         String merge = airline + ", " + delay;
 
         logger.info("SortReducer result " + merge);
-        context.write(NullWritable.get(), new Text(merge));
+        resultList.add(merge);
+//        context.write(NullWritable.get(), new Text(merge));
+    }
+
+    @Override
+    public void cleanup(Context context) throws IOException, InterruptedException {
+        for (int i =0; i<=NUMBER_TO_OUTPUT; i++) {
+            context.write(NullWritable.get(), new Text(resultList.get(i)));
+        }
     }
 }
