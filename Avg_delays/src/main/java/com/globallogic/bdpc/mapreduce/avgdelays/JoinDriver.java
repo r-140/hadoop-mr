@@ -3,6 +3,7 @@ package com.globallogic.bdpc.mapreduce.avgdelays;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -17,7 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 
 //https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
 public class JoinDriver {
@@ -31,7 +32,7 @@ public class JoinDriver {
 //        job.setNumReduceTasks(2);
         // job.setMapperClass(JoinMapper.class);
         job.setCombinerClass(JoinReducer.class);
-        job.setSortComparatorClass(ValueComparator.class);
+//        job.setSortComparatorClass(ValueComparator.class);
         job.setReducerClass(SortReducer.class);
 
         job.setMapOutputKeyClass(Text.class);
@@ -52,6 +53,13 @@ public class JoinDriver {
 
         FileOutputFormat.setOutputPath(job, new Path(args[2]));
         System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+//        JobConf conf1 = new JobConf(JoinDriver.class);
+//        conf1.setJobName("Join Job");
+//        conf1.setJarByClass(JoinDriver.class);
+////        conf1.setCombinerClass(JoinReducer.class);
+//        conf1.setReducerClass(JoinReducer.class);
+
     }
 
     public static class JoinMapperAirlineName extends Mapper<Object, Text, Text, Text> {
