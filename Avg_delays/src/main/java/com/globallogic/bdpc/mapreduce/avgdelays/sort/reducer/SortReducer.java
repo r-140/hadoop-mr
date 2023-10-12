@@ -50,7 +50,7 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
         Path outputPath = new Path(context.getConfiguration().get("output") + "/" + "result");
         SequenceFile.Writer writer = SequenceFile.createWriter(context.getConfiguration(),
                 SequenceFile.Writer.file(outputPath),
-                SequenceFile.Writer.keyClass(Text.class),
+                SequenceFile.Writer.keyClass(NullWritable.class),
                 SequenceFile.Writer.valueClass(Text.class));
 
         for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
