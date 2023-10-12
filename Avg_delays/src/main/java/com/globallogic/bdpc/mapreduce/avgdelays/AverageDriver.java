@@ -70,7 +70,7 @@ public class AverageDriver {
         sortJob.setOutputKeyClass(Text.class);
         sortJob.setOutputValueClass(Text.class);
         sortJob.setNumReduceTasks(1);
-//        sortJob.setSortComparatorClass(ValueComparator.class);
+        sortJob.setSortComparatorClass(ValueComparator.class);
         FileInputFormat.addInputPath(sortJob, new Path(JOIN_JOB_OUTPUT_PATH));
         FileOutputFormat.setOutputPath(sortJob, new Path(args[2]));
 

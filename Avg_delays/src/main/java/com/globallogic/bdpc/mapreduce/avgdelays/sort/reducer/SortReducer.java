@@ -22,49 +22,44 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
 
     private static final int MAX_RESULT = 5;
 
-    @Override
-    public void setup(Context context) throws IOException, InterruptedException {
-        tmap2 = new TreeMap<>(Collections.reverseOrder());
-    }
+//    @Override
+//    public void setup(Context context) throws IOException, InterruptedException {
+//        tmap2 = new TreeMap<>(Collections.reverseOrder());
+//    }
 
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
         logger.info("SortReducer key " + key);
-        Double delay = key.get();
+        double delay = key.get();
         String airline = "";
         for (Text value : values) {
             airline = value.toString();
         }
+        final String merge = airline + ", " + delay;
 
-        tmap2.put(delay, airline);
+        logger.info("SortReducer result " + merge);
+        context.write(NullWritable.get(), new Text(merge));
 
-        if (tmap2.size() > MAX_RESULT) {
-            tmap2.remove(tmap2.firstKey());
-        }
+//        tmap2.put(delay, airline);
+//        if (tmap2.size() > MAX_RESULT) {
+//            tmap2.remove(tmap2.firstKey());
+//        }
     }
 
-    @Override
-    public void cleanup(Context context) throws IOException, InterruptedException {
-
-//        Path outputPath = new Path(context.getConfiguration().get("output") + "/" + "result");
-//        SequenceFile.Writer writer = SequenceFile.createWriter(context.getConfiguration(),
-//                SequenceFile.Writer.file(outputPath),
-//                SequenceFile.Writer.keyClass(NullWritable.class),
-//                SequenceFile.Writer.valueClass(Text.class));
-
-        for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
-            double delay = entry.getKey();
-            String airline = entry.getValue();
-
-            final String merge = airline + ", " + delay;
-
-            logger.info("SortReducer result " + merge);
-//            writer.append(NullWritable.get(), new Text(merge));
-            context.write(NullWritable.get(), new Text(merge));
-        }
-
-//        writer.close();
-    }
+//    @Override
+//    public void cleanup(Context context) throws IOException, InterruptedException {
+//
+//        for (Map.Entry<Double, String> entry : tmap2.entrySet()) {
+//            double delay = entry.getKey();
+//            String airline = entry.getValue();
+//
+//            final String merge = airline + ", " + delay;
+//
+//            logger.info("SortReducer result " + merge);
+//            context.write(NullWritable.get(), new Text(merge));
+//        }
+//
+//    }
 }
 
