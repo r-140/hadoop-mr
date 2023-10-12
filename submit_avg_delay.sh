@@ -62,7 +62,7 @@ echo "-------------------------------------"
 
 mapReduceArguments=(
   "$APP_PATH"
-  "com.globallogic.bdpc.mapreduce.avgdelays.JoinDriver"
+  "com.globallogic.bdpc.mapreduce.avgdelays.AverageDriver"
   "$INPUT_PATH1"
   "$INPUT_PATH2"
   "$OUTPUT_PATH"
