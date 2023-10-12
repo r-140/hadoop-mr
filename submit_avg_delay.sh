@@ -4,6 +4,7 @@ usage() {
        "-i1 defines an input path\n"\
        "-i2 defines an input path\n"\
        "-o defines an output path\n"\
+       "-m defines max output size"
        "-e defines an executor: hadoop or yarn, yarn but default\n"\
        "\n"\
         1>&2
@@ -11,11 +12,12 @@ usage() {
 }
 
 
-while getopts ":i1:i2:o:e:" opt; do
+while getopts ":i1:i2:o:m:e:" opt; do
     case "$opt" in
         i1) INPUT_PATH1=${OPTARG} ;;
         i2) INPUT_PATH2=${OPTARG} ;;
         o)  OUTPUT_PUTH=${OPTARG} ;;
+        m)  OUTPUT_SIZE=${OPTARG} ;;
         e)  EXECUTOR=${OPTARG} ;;
         *)  usage ;;
     esac
@@ -34,6 +36,11 @@ fi
 if [[ -z "$OUTPUT_PATH" ]];
 then
   OUTPUT_PATH="/bdpc/hadoop_mr/avg_delay/output"
+fi
+
+if [[ -z "OUTPUT_SIZE" ]];
+then
+  OUTPUT_SIZE="5"
 fi
 
 if [[ -z "$EXECUTOR" ]];
@@ -59,6 +66,7 @@ echo "-------------------------------------"
 echo "INPUT_PATH1 = $INPUT_PATH1"
 echo "INPUT_PATH2 = $INPUT_PATH2"
 echo "OUTPUT_PUTH = $OUTPUT_PATH"
+echo "$OUTPUT_SIZE = $OUTPUT_SIZE"
 echo "-------------------------------------"
 
 mapReduceArguments=(
@@ -67,6 +75,7 @@ mapReduceArguments=(
   "$INPUT_PATH1"
   "$INPUT_PATH2"
   "$OUTPUT_PATH"
+  "$OUTPUT_SIZE"
 )
 
 SUBMIT_CMD="${EXECUTOR} jar ${mapReduceArguments[@]}"

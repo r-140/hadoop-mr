@@ -4,9 +4,9 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
-public  class ValueComparator extends WritableComparator {
+public  class DelayComparator extends WritableComparator {
 
-        protected ValueComparator() {
+        protected DelayComparator() {
             super(DoubleWritable.class, true);
         }
 

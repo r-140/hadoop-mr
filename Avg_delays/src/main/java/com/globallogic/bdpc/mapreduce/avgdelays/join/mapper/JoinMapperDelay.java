@@ -20,14 +20,14 @@ public class JoinMapperDelay extends Mapper<Object, Text, Text, Text> {
     String[] headerList;
     String header;
 
-    private Configuration conf;
-
     private static final String FLIGHTS_FILE_NAME = "flights.csv";
 
+    private static final String AIRLINE_DELAY_PREFIX = "delay:";
+    private static final String SEPARATOR = ",";
     int counter = 0;
     @Override
     protected void setup(Mapper.Context context) throws IOException, InterruptedException {
-        conf = context.getConfiguration();
+        final Configuration conf = context.getConfiguration();
         URI[] patternsURIs = Job.getInstance(conf).getCacheFiles();
         for (URI patternsURI : patternsURIs) {
             Path patternsPath = new Path(patternsURI.getPath());
@@ -37,8 +37,7 @@ public class JoinMapperDelay extends Mapper<Object, Text, Text, Text> {
             if(FLIGHTS_FILE_NAME.equals(patternsFileName)) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
                 header = bufferedReader.readLine();
-                headerList = header.split(",");
-                logger.info("delay header " + header);
+                headerList = header.split(SEPARATOR);
                 logger.info("delay header List " + Arrays.toString(headerList));
             }
         }
@@ -47,15 +46,15 @@ public class JoinMapperDelay extends Mapper<Object, Text, Text, Text> {
     public void map(Object key, Text value, Context context)
             throws IOException, InterruptedException {
 
-        String line = value.toString();
-        String[] values = value.toString().split(",");
+        final String line = value.toString();
+        final String[] values = value.toString().split(SEPARATOR);
 
         if(headerList.length == values.length && !header.equals(line)) {
             if(counter < 4) {
                 logger.info("Delay mapper iata_code " + values[4]);
                 counter++;
             }
-            context.write(new Text(values[4]), new Text("delay:" + values[11]));
+            context.write(new Text(values[4]), new Text(AIRLINE_DELAY_PREFIX + values[11]));
         }
     }
 }

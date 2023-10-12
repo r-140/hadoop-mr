@@ -3,7 +3,7 @@ package com.globallogic.bdpc.mapreduce.avgdelays;
 import com.globallogic.bdpc.mapreduce.avgdelays.join.mapper.JoinMapperAirlineName;
 import com.globallogic.bdpc.mapreduce.avgdelays.join.mapper.JoinMapperDelay;
 import com.globallogic.bdpc.mapreduce.avgdelays.join.reducer.JoinReducer;
-import com.globallogic.bdpc.mapreduce.avgdelays.sort.comparator.ValueComparator;
+import com.globallogic.bdpc.mapreduce.avgdelays.sort.comparator.DelayComparator;
 import com.globallogic.bdpc.mapreduce.avgdelays.sort.mapper.SortMapper;
 import com.globallogic.bdpc.mapreduce.avgdelays.sort.reducer.SortReducer;
 import org.apache.hadoop.conf.Configuration;
@@ -13,25 +13,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
-import java.util.*;
-import java.util.stream.Collectors;
-//import java.util.stream.Collectors;
-
-//https://github.com/isurunuwanthilaka/map-reduce-average-java/blob/master/java-code/src/main/java/com/isuru/Average.java
 public class AverageDriver {
 
-    final static Logger logger = Logger.getLogger(AverageDriver.class);
     private static final String JOIN_JOB_OUTPUT_PATH = "/bdpc/hadoop_mr/avg_delay/outputjoin";
+    private static final int DEFAULT_OUTPUT_SIZE = 5;
     public static void main(final String[] args) throws Exception {
         Configuration conf = new Configuration();
         Job joinJob = Job.getInstance(conf, "Join Airlines and Delays");
@@ -58,8 +46,6 @@ public class AverageDriver {
         FileOutputFormat.setOutputPath(joinJob, new Path(JOIN_JOB_OUTPUT_PATH));
         joinJob.waitForCompletion(true);
 
-        logger.info("join job has been finished, starting sorting job");
-
         Configuration conf2 = new Configuration();
         Job sortJob = Job.getInstance(conf2, "sortJob");
         sortJob.setJarByClass(AverageDriver.class);
@@ -70,34 +56,15 @@ public class AverageDriver {
         sortJob.setOutputKeyClass(Text.class);
         sortJob.setOutputValueClass(Text.class);
         sortJob.setNumReduceTasks(1);
-        sortJob.setSortComparatorClass(ValueComparator.class);
+        sortJob.setSortComparatorClass(DelayComparator.class);
         FileInputFormat.addInputPath(sortJob, new Path(JOIN_JOB_OUTPUT_PATH));
         FileOutputFormat.setOutputPath(sortJob, new Path(args[2]));
+
+        int maxOutputSize = args[3] == null ? DEFAULT_OUTPUT_SIZE : Integer.parseInt(args[3]);
+
+        sortJob.getConfiguration().setInt("avgdelay.max.output.size", maxOutputSize);
 
         System.exit(sortJob.waitForCompletion(true) ? 0 : 1);
 
     }
-
-
-
-
-
-
-
-
-
-//    public static class ValueComparator extends WritableComparator {
-//
-//        protected ValueComparator() {
-//            super(DoubleWritable.class, true);
-//        }
-//
-//        @Override
-//        public int compare(WritableComparable a, WritableComparable b) {
-//            DoubleWritable aVal = (DoubleWritable) a;
-//            DoubleWritable bVal = (DoubleWritable) b;
-//            return -1 * aVal.compareTo(bVal);
-//        }
-//
-//    }
 }

@@ -18,12 +18,13 @@ public  class JoinMapperAirlineName extends Mapper<Object, Text, Text, Text> {
     String[] headerList;
     String header;
 
-    private Configuration conf;
+    private static final String SEPARATOR = ",";
+    private static final String AIRLINE_NAME_PREFIX = "name:";
 
     private static final String AIRLINES_FILE_NAME = "airlines.csv";
     @Override
     protected void setup(Mapper.Context context) throws IOException, InterruptedException {
-        conf = context.getConfiguration();
+        final Configuration conf = context.getConfiguration();
         URI[] patternsURIs = Job.getInstance(conf).getCacheFiles();
         for (URI patternsURI : patternsURIs) {
             Path patternsPath = new Path(patternsURI.getPath());
@@ -32,20 +33,19 @@ public  class JoinMapperAirlineName extends Mapper<Object, Text, Text, Text> {
             if(AIRLINES_FILE_NAME.equals(patternsFileName)) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(patternsFileName));
                 header = bufferedReader.readLine();
-                headerList = header.split(",");
-                logger.info("airline header " + header);
+                headerList = header.split(SEPARATOR);
                 logger.info("airline header List " + Arrays.toString(headerList));
             }
         }
     }
     public void map(Object key, Text value, Context context)
             throws IOException, InterruptedException {
-        String line = value.toString();
-        String[] values = value.toString().split(",");
+        final String line = value.toString();
+        final String[] values = value.toString().split(SEPARATOR);
 
         if(headerList.length == values.length && !header.equals(line)) {
-            logger.info("airline values " + Arrays.toString(values));
-            context.write(new Text(values[0]), new Text("name:" + values[1]));
+            logger.info("JoinMapperAirlineName airline values " + Arrays.toString(values));
+            context.write(new Text(values[0]), new Text(AIRLINE_NAME_PREFIX + values[1]));
         }
     }
 }
