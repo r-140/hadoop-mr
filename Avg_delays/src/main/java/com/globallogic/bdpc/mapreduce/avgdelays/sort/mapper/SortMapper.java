@@ -39,11 +39,10 @@ public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
 
         tmap.put(delay, outputKey);
 
-        logger.info("SortMapper ouput " + outputKey + " delay " + delay);
         if(tmap.size() > MAX_RESULT) {
-            tmap.remove(tmap.firstKey());
+            tmap.remove(tmap.lastKey());
         }
-        logger.info("SORTMAPPER map " + tmap);
+        logger.info("Sortmapper map " + tmap);
     }
 
     @Override
