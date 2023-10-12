@@ -38,7 +38,7 @@ then
   OUTPUT_PATH="/bdpc/hadoop_mr/avg_delay/output"
 fi
 
-if [[ -z "OUTPUT_SIZE" ]];
+if [[ -z "$OUTPUT_SIZE" ]];
 then
   OUTPUT_SIZE="5"
 fi
@@ -66,7 +66,7 @@ echo "-------------------------------------"
 echo "INPUT_PATH1 = $INPUT_PATH1"
 echo "INPUT_PATH2 = $INPUT_PATH2"
 echo "OUTPUT_PUTH = $OUTPUT_PATH"
-echo "$OUTPUT_SIZE = $OUTPUT_SIZE"
+echo "OUTPUT_SIZE = $OUTPUT_SIZE"
 echo "-------------------------------------"
 
 mapReduceArguments=(
