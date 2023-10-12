@@ -1,18 +1,11 @@
 package com.globallogic.bdpc.mapreduce.avgdelays.sort.mapper;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
 
 public class SortMapper extends Mapper<Object, DoubleWritable, Text, DoubleWritable> {
     final static Logger logger = Logger.getLogger(SortMapper.class);
