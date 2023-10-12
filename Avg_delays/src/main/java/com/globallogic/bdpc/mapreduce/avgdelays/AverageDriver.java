@@ -38,7 +38,7 @@ public class AverageDriver {
 
         joinJob.setJarByClass(AverageDriver.class);
         joinJob.setReducerClass(JoinReducer.class);
-
+        joinJob.setNumReduceTasks(1);
         joinJob.setMapOutputKeyClass(Text.class);
         joinJob.setMapOutputValueClass(Text.class);
         joinJob.setOutputKeyClass(Text.class);
@@ -69,6 +69,7 @@ public class AverageDriver {
         sortJob.setMapOutputValueClass(Text.class);
         sortJob.setOutputKeyClass(Text.class);
         sortJob.setOutputValueClass(Text.class);
+        sortJob.setNumReduceTasks(1);
 //        sortJob.setSortComparatorClass(ValueComparator.class);
         FileInputFormat.addInputPath(sortJob, new Path(JOIN_JOB_OUTPUT_PATH));
         FileOutputFormat.setOutputPath(sortJob, new Path(args[2]));
