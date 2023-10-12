@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class AverageDriver {
 
     final static Logger logger = Logger.getLogger(AverageDriver.class);
+    private static final String JOIN_JOB_OUTPUT_PATH = "/bdpc/hadoop_mr/avg_delay/outputjoin";
     public static void main(final String[] args) throws Exception {
         Configuration conf = new Configuration();
         Job joinJob = Job.getInstance(conf, "Join Airlines and Delays");
@@ -54,7 +55,7 @@ public class AverageDriver {
         joinJob.addCacheFile(airlinesPath.toUri());
         joinJob.addCacheFile(flightsPath.toUri());
 
-        FileOutputFormat.setOutputPath(joinJob, new Path(args[2]));
+        FileOutputFormat.setOutputPath(joinJob, new Path(JOIN_JOB_OUTPUT_PATH));
         joinJob.waitForCompletion(true);
 //        System.exit(joinJob.waitForCompletion(true) ? 0 : 1);
 
@@ -69,7 +70,7 @@ public class AverageDriver {
         sortJob.setOutputValueClass(Text.class);
         sortJob.setSortComparatorClass(ValueComparator.class);
 
-        FileInputFormat.addInputPath(sortJob, new Path(args[2]));
+        FileInputFormat.addInputPath(sortJob, new Path(JOIN_JOB_OUTPUT_PATH));
         FileOutputFormat.setOutputPath(sortJob, new Path(args[2]));
 
         System.exit(sortJob.waitForCompletion(true) ? 0 : 1);
