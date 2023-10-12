@@ -57,7 +57,6 @@ public class AverageDriver {
 
         FileOutputFormat.setOutputPath(joinJob, new Path(JOIN_JOB_OUTPUT_PATH));
         joinJob.waitForCompletion(true);
-//        System.exit(joinJob.waitForCompletion(true) ? 0 : 1);
 
         logger.info("join job has been finished, starting sorting job");
 
@@ -66,6 +65,8 @@ public class AverageDriver {
         sortJob.setJarByClass(AverageDriver.class);
         sortJob.setMapperClass(SortMapper.class);
         sortJob.setReducerClass(SortReducer.class);
+        sortJob.setMapOutputKeyClass(Text.class);
+        sortJob.setMapOutputValueClass(DoubleWritable.class);
         sortJob.setOutputKeyClass(Text.class);
         sortJob.setOutputValueClass(Text.class);
         sortJob.setSortComparatorClass(ValueComparator.class);
