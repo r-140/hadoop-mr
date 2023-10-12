@@ -43,6 +43,7 @@ public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
         if(tmap.size() > MAX_RESULT) {
             tmap.remove(tmap.firstKey());
         }
+        logger.info("SORTMAPPER map " + tmap);
     }
 
     @Override
