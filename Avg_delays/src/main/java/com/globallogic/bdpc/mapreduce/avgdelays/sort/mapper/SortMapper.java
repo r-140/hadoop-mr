@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
-public class SortMapper extends Mapper<Object, DoubleWritable, Text, DoubleWritable> {
+public class SortMapper extends Mapper<Object, Object, Text, DoubleWritable> {
     final static Logger logger = Logger.getLogger(SortMapper.class);
 
 //    private Configuration conf;
@@ -29,11 +29,11 @@ public class SortMapper extends Mapper<Object, DoubleWritable, Text, DoubleWrita
 //        }
 //    }
 
-    public void map(Object key, DoubleWritable value, Context context)
+    public void map(Object key, Object value, Context context)
             throws IOException, InterruptedException {
 
         logger.info("airline key  " + key + ", average delay values " + value);
-        context.write(new Text(key.toString()), value);
+        context.write(new Text(key.toString()), new DoubleWritable((Double) value));
 
     }
 }
