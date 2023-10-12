@@ -40,8 +40,9 @@ if [[ -z "$EXECUTOR" ]];
 then
   EXECUTOR="yarn"
 fi
-INPUT_PATH = "/bdpc/Avg_Delays_MR/Avg_delays/input"
+
 hadoop fs -rm -R $OUTPUT_PATH
+hadoop fs -rm -R "/bdpc/hadoop_mr/avg_delay/outputjoin"
 hdfs dfs -ls ${INPUT_PATH}
 
 THIS_FILE=$(readlink -f "$0")
