@@ -6,6 +6,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class SortMapper extends Mapper<Object, Object, Text, DoubleWritable> {
     final static Logger logger = Logger.getLogger(SortMapper.class);
@@ -33,7 +34,18 @@ public class SortMapper extends Mapper<Object, Object, Text, DoubleWritable> {
             throws IOException, InterruptedException {
 
         logger.info("airline key  " + key + ", average delay values " + value);
-        context.write(new Text(key.toString()), new DoubleWritable((Double) value));
+
+        String valueStr = value.toString();
+        String[] values = valueStr.split(":::");
+
+        logger.info("splitted values " + Arrays.toString(values));
+
+        String outputKey = values[0] + ", " + values[1];
+        String delayStr = values[3].split(":")[1];
+        logger.info("delay value " + delayStr);
+
+        double delay = Double.parseDouble(delayStr);
+        context.write(new Text(outputKey), new DoubleWritable(delay));
 
     }
 }
