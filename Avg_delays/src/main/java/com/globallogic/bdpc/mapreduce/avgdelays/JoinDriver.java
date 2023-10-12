@@ -99,7 +99,7 @@ public class JoinDriver {
 
         private static final String FLIGHTS_FILE_NAME = "flights.csv";
 
-        int counter;
+        int counter = 0;
         @Override
         protected void setup(Mapper.Context context) throws IOException, InterruptedException {
             conf = context.getConfiguration();
@@ -126,6 +126,10 @@ public class JoinDriver {
             String[] values = value.toString().split(",");
 
             if(headerList.length == values.length && !header.equals(line)) {
+                if(counter < 4) {
+                    logger.info("Delay mapper iata_code " + values[4]);
+                    counter++;
+                }
                 context.write(new Text(values[4]), new Text("delay:" + values[11]));
             }
         }
