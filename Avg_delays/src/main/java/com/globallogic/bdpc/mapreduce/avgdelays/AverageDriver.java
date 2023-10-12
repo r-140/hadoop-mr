@@ -65,8 +65,8 @@ public class AverageDriver {
         sortJob.setJarByClass(AverageDriver.class);
         sortJob.setMapperClass(SortMapper.class);
         sortJob.setReducerClass(SortReducer.class);
-        sortJob.setMapOutputKeyClass(Text.class);
-        sortJob.setMapOutputValueClass(DoubleWritable.class);
+        sortJob.setMapOutputKeyClass(DoubleWritable.class);
+        sortJob.setMapOutputValueClass(Text.class);
         sortJob.setOutputKeyClass(Text.class);
         sortJob.setOutputValueClass(Text.class);
         sortJob.setSortComparatorClass(ValueComparator.class);

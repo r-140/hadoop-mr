@@ -13,21 +13,20 @@ public class SortReducer extends Reducer<Text, DoubleWritable, NullWritable, Tex
 
     final static Logger logger = Logger.getLogger(JoinReducer.class);
 
-    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
+    public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
         logger.info("SortReducer key " + key);
-        String keyStr = key.toString();
-
-        logger.info("SortReducer key " + keyStr);
-        double delay = 0;
-        for (DoubleWritable value : values) {
+        double delay = key.get();
+        String airline = "";
+        for (Text value : values) {
             logger.info("sort reducer key " + key + " value " + value);
-            delay = value.get();
+            airline = value.toString();
 
         }
-        String merge = keyStr + ", " + delay;
+        String merge = airline + ", " + delay;
 
+        logger.info("SortReducer result " + merge);
         context.write(NullWritable.get(), new Text(merge));
     }
 }
