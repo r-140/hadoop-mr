@@ -7,10 +7,21 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
     final static Logger logger = Logger.getLogger(SortMapper.class);
 
+    private TreeMap<Double, String> tmap;
+
+    private static final int MAX_RESULT = 5;
+
+    @Override
+    public void setup(Context context)
+            throws IOException, InterruptedException {
+        tmap = new TreeMap<Double, String>();
+    }
 
     public void map(Object key, Object value, Context context)
             throws IOException, InterruptedException {
@@ -23,7 +34,27 @@ public class SortMapper extends Mapper<Object, Object, DoubleWritable, Text> {
         String outputKey = values[0] + ", " + values[1];
         String delayStr = values[2].split(":")[1];
 
-        double delay = Double.parseDouble(delayStr);
-        context.write(new DoubleWritable(delay), new Text(outputKey));
+        Double delay = Double.parseDouble(delayStr);
+
+        tmap.put(delay, outputKey);
+
+        if(tmap.size() > MAX_RESULT) {
+            tmap.remove(tmap.firstKey());
+        }
+
+//        context.write(new DoubleWritable(delay), new Text(outputKey));
+    }
+
+    @Override
+    public void cleanup(Context context)
+            throws IOException, InterruptedException
+    {
+        for (Map.Entry<Double, String> entry :  tmap.entrySet()) {
+
+            Double delay = entry.getKey();
+            String outputKey = entry.getValue();
+
+            context.write(new DoubleWritable(delay), new Text(outputKey));
+        }
     }
 }

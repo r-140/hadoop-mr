@@ -16,9 +16,9 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
 
     final static Logger logger = Logger.getLogger(JoinReducer.class);
 
-    private List<String> resultList = new ArrayList<>();
+//    private List<String> resultList = new ArrayList<>();
 
-    private int NUMBER_TO_OUTPUT = 5;
+
 
     public void reduce(DoubleWritable key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
@@ -34,14 +34,14 @@ public class SortReducer extends Reducer<DoubleWritable, Text, NullWritable, Tex
         String merge = airline + ", " + delay;
 
         logger.info("SortReducer result " + merge);
-        resultList.add(merge);
-//        context.write(NullWritable.get(), new Text(merge));
+//        resultList.add(merge);
+        context.write(NullWritable.get(), new Text(merge));
     }
 
-    @Override
-    public void cleanup(Context context) throws IOException, InterruptedException {
-        for (int i =0; i<=NUMBER_TO_OUTPUT; i++) {
-            context.write(NullWritable.get(), new Text(resultList.get(i)));
-        }
-    }
+//    @Override
+//    public void cleanup(Context context) throws IOException, InterruptedException {
+//        for (int i =0; i<=NUMBER_TO_OUTPUT; i++) {
+//            context.write(NullWritable.get(), new Text(resultList.get(i)));
+//        }
+//    }
 }
