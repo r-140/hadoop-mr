@@ -29,12 +29,6 @@ THIS_PATH=$(dirname "$THIS_FILE")
 BASE_PATH=$(readlink -f "$THIS_PATH/../")
 APP_PATH="$THIS_PATH/avg_delays-1.0-jar-with-dependencies.jar"
 
-#if [ "${FORMAT}" = 'txt' ]; then
-#  LOCAL_PATH="${BASE_PATH}/data/word_count/*"
-#else
-#  LOCAL_PATH="${BASE_PATH}/data/word_count_gzip/*"
-#fi
-
 STORAGE_PATH="gs://bigdata-procamp-iu/"
 
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
